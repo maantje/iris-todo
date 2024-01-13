@@ -1,0 +1,61 @@
+package main
+
+import "strconv"
+
+templ headerComponent(title string) {
+	<head>
+		<title>{ title }</title>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+        <style>
+            form {
+                margin: 0;
+            }
+        </style>
+	</head>
+}
+
+templ todoTitle(todo todo, index int) {
+	<form action={ templ.SafeURL("todo/" + strconv.Itoa(index) + "/toggle") } method="post">
+		<button
+			type="submit"
+			if todo.completed {
+				class="line-through"
+			}
+		>
+			{ todo.title }
+		</button>
+	</form>
+}
+
+templ todoItem(todo todo, index int) {
+	<li class="flex justify-between items-center todo">
+		@todoTitle(todo, index)
+		<form action={ templ.SafeURL("todo/" + strconv.Itoa(index) + "/delete") } method="post">
+			<button type="submit">
+				<svg fill-rule="evenodd" viewBox="64 64 896 896" focusable="false" data-icon="close" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M799.86 166.31c.02 0 .04.02.08.06l57.69 57.7c.04.03.05.05.06.08a.12.12 0 010 .06c0 .03-.02.05-.06.09L569.93 512l287.7 287.7c.04.04.05.06.06.09a.12.12 0 010 .07c0 .02-.02.04-.06.08l-57.7 57.69c-.03.04-.05.05-.07.06a.12.12 0 01-.07 0c-.03 0-.05-.02-.09-.06L512 569.93l-287.7 287.7c-.04.04-.06.05-.09.06a.12.12 0 01-.07 0c-.02 0-.04-.02-.08-.06l-57.69-57.7c-.04-.03-.05-.05-.06-.07a.12.12 0 010-.07c0-.03.02-.05.06-.09L454.07 512l-287.7-287.7c-.04-.04-.05-.06-.06-.09a.12.12 0 010-.07c0-.02.02-.04.06-.08l57.7-57.69c.03-.04.05-.05.07-.06a.12.12 0 01.07 0c.03 0 .05.02.09.06L512 454.07l287.7-287.7c.04-.04.06-.05.09-.06a.12.12 0 01.07 0z"></path></svg>
+			</button>
+		</form>
+	</li>
+}
+
+templ indexPage(todos []todo) {
+	<html>
+		@headerComponent("My Blog")
+		<body class="bg-gray-400 flex justify-center">
+			<div class="mt-24 bg-white rounded p-4" hx-boost="true">
+				<form class="flex gap-2" action="/todo" method="post">
+					<input class="p-2 rounded border" name="title"/>
+					<button class="rounded bg-blue-500 text-white px-4">Add</button>
+				</form>
+				<ul class="mt-4 gap-y-2 flex flex-col">
+					for index, todo := range todos {
+						@todoItem(todo, index)
+					}
+				</ul>
+			</div>
+		</body>
+	</html>
+}
